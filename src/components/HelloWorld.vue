@@ -19,19 +19,27 @@ export default {
   },
   methods: {
     fetchData() {
-      // use a piece of dynamic data to modify the API call
+      // use dynamic data to modify the API call
+      // in this case we use a text box which sets searchString
+      // and the currentPage to allow us to loop through the paginated results
       let queryString = this.query + this.searchString + '&page=' + this.currentPage
       console.log('API call: ' + queryString)
       fetch(queryString)
         .then((response) => {
           response.json().then((res) => {
+            // build a temporary object, add the data from the current page on each call of fetchData()
             this.$data.tempData = { ...this.$data.tempData, ...res }
+            // the same as above but with just the results array instead of the whole data object
             this.$data.tempResultSet = this.$data.tempResultSet.concat(res.results)
+            // total items from the meta object (total number of items found in the search)
             this.$data.total = res.meta.count.total
-            // check how many pages of results @ 25 per page
+            // if there are items
             if (this.$data.total > 0) {
+              // check how many pages of results @ 25 per page
               if (this.currentPage * 25 < 500 && this.currentPage * 25 < this.$data.total) {
+                // go to the next page
                 this.currentPage++
+                // call this function on itself (recursive) ! be careful, this can cause an infinite loop
                 this.fetchData()
               } else {
                 this.$data.theData = this.$data.tempData
