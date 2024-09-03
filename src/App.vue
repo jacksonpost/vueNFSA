@@ -7,7 +7,7 @@ import HelloWorld from './components/HelloWorld.vue'
   <header>
     <!-- <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" /> -->
     <div class="wrapper">
-      <HelloWorld msg="dog" />
+      <HelloWorld msg="Search the collection" />
 
       <nav>
         <RouterLink to="/">Home</RouterLink>
@@ -18,7 +18,6 @@ import HelloWorld from './components/HelloWorld.vue'
 
   <!-- shows the current router view (about or home) -->
   <RouterView />
-  
 </template>
 
 <style scoped>
