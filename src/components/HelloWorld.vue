@@ -14,7 +14,7 @@ export default {
       total: 0,
       imgURL: 'https://media.nfsacollection.net/',
       query: 'https://api.collection.nfsa.gov.au/search?limit=25&query=',
-      searchString: 'dog'
+      searchString: 'lobby'
     }
   },
   methods: {
@@ -65,7 +65,7 @@ export default {
 </script>
 
 <template>
-  <div class="greetings">
+  <div class="search">
     <h1 class="green">{{ msg }}</h1>
 
     <input v-model="searchString" placeholder="query" />
@@ -78,8 +78,8 @@ export default {
       loop through the API results and add a list item for each result.
       Use result to access properties like 'title' and 'name' -->
       <li v-for="(result, index) in resultSet" :key="result[index]">
-        <!-- <p>{{ result['title'] }}</p> -->
-        <!-- <p>{{ result['name'] }}</p> -->
+        <p>{{ result['title'] }}</p>
+        <p>{{ result['name'] }}</p>
         <!-- check if there's any items in the preview array.  If so, put the biggest image in the view -->
         <!-- v-bind is used to update the src attribute when the data comes in -->
         <img
@@ -116,14 +116,14 @@ h3 {
   font-size: 1.2rem;
 }
 
-.greetings h1,
-.greetings h3 {
+.search h1,
+.search h3 {
   text-align: center;
 }
 
 @media (min-width: 1024px) {
-  .greetings h1,
-  .greetings h3 {
+  .search h1,
+  .search h3 {
     text-align: left;
   }
 }

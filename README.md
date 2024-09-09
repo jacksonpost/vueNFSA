@@ -1,6 +1,17 @@
 # vueNFSA
 
-This template should help get you started developing with Vue 3 in Vite.
+Vue 3 with Vite.
+
+Commands to remember:
+
+To start development:
+npm run dev
+
+To build:
+npm run build
+
+To push build to Git Pages:
+git subtree push --prefix dist origin gh-pages
 
 ## Recommended IDE Setup
 
