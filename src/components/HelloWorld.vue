@@ -30,13 +30,29 @@ export default {
     return {
       theData: {},
       tempData: {},
-      resultSet: Array(),
-      tempResultSet: Array(),
+      resultSet: [],
+      tempResultSet: [],
       currentPage: 1,
       total: 0,
       imgURL: 'https://media.nfsacollection.net/',
       query: 'https://api.collection.nfsa.gov.au/search?limit=25&hasMedia=yes&query=',
-      searchString: 'lobby'
+      searchString: 'lobby',
+      selectedCategories: []
+    }
+  },
+  computed: {
+    filteredItems() {
+      if (this.selectedCategories.length === 0) {
+        return this.resultSet // Return all items if no category is selected
+      }
+      return this.resultSet.filter(
+        (item) =>
+          (item['forms'] && this.selectedCategories.includes(item['forms'][0])) ||
+          (item['countries'] && this.selectedCategories.includes(item['countries'][0])) ||
+          (item['parentTitle'] &&
+            item['parentTitle']['genres'] &&
+            this.selectedCategories.includes(item['parentTitle']['genres'][0]))
+      )
     }
   },
   methods: {
@@ -102,11 +118,25 @@ export default {
 
     <p>Total: {{ total }}</p>
 
+    <p>Filter Items with Checkboxes</p>
+    <div>
+      <label>
+        <input type="checkbox" value="Lobby card" v-model="selectedCategories" /> Lobby card
+      </label>
+      <label>
+        <input type="checkbox" value="Australia" v-model="selectedCategories" /> From Australia
+      </label>
+      <label>
+        <input type="checkbox" value="Bushranger" v-model="selectedCategories" /> Genre: Bushranger
+      </label>
+    </div>
+
     <ul role="list" class="list-v">
       <!-- create a variable called result, 
       loop through the API results and add a list item for each result.
       Use result to access properties like 'title' and 'name' -->
-      <li v-for="(result, index) in resultSet" :key="result[index]">
+      <li v-for="(result, index) in filteredItems" :key="result[index]">
+        <!-- <li v-for="(result, index) in resultSet" :key="result[index]"> -->
         <p class="title">{{ result['title'] }}</p>
         <p>{{ result['name'] }}</p>
         <!-- check if there's any items in the preview array.  If so, put the biggest image in the view -->
