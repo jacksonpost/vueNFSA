@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import D3Test from './components/D3Test.vue'
 // import HelloWorld from './components/HelloWorld.vue'
 </script>
 
@@ -17,6 +18,7 @@ import { RouterLink, RouterView } from 'vue-router'
     </div>
   </header>
 
+  <D3Test />
   <!-- shows the current router view (about or home) -->
   <RouterView />
 </template>

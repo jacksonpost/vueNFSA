@@ -59,7 +59,8 @@ export default {
             // if there are items
             if (this.$data.total > 0) {
               // check how many pages of results @ 25 per page
-              if (this.currentPage * 25 < 500 && this.currentPage * 25 < this.$data.total) {
+              if (this.currentPage * 25 < this.$data.total) {
+                //if (this.currentPage * 25 < 500 && this.currentPage * 25 < this.$data.total) {
                 // go to the next page
                 this.currentPage++
                 // call this function on itself (recursive) ! be careful, this can cause an infinite loop

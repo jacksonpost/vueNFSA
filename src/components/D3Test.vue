@@ -3,93 +3,125 @@
 
 import * as d3 from 'd3'
 import { useSearchDataStore } from '@/stores/searchData'
+import { computed, watch } from 'vue'
 
 export default {
   name: 'D3Test',
-  props: {
-    srcData: {}
-  },
   data() {
-    return {}
+    return {
+      parsedData: {}
+    }
   },
   mounted() {
     const store = useSearchDataStore()
-    const data = store.theStoredData
-    let filteredData = data.filter(
-      (item: any) => item.productionDates !== undefined && item.countries !== undefined
+    const data = computed(() => store.theStoredData)
+    // const data = store.theStoredData
+    // console.log(data)
+
+    watch(
+      () => store.theStoredData,
+      () => {
+        console.log('Watcher has watched')
+
+        this.drawChart(data)
+      }
     )
-    let dates = []
-    filteredData.forEach((e, i) => {
-      // console.log(e)
-      dates[i] = e['productionDates'][0]['fromYear']
-    })
+
+    // let dates = []
+    // filteredData.forEach((e, i) => {
+    //   dates[i] = e['productionDates'][0]['fromYear']
+    // })
     // console.log(dates)
-    // console.log(filteredData)
 
-    const parsedData = filteredData.map((d) => ({
-      date: d['productionDates'][0]['fromYear'],
-      value: d['id']
-    }))
-    console.log(parsedData)
+    this.drawChart(data)
+  },
+  methods: {
+    drawChart(data: any) {
+      console.log('chart is charting')
 
-    // Set dimensions and margins
-    const margin = { top: 20, right: 30, bottom: 40, left: 40 }
-    const width = 600 - margin.left - margin.right
-    const height = 400 - margin.top - margin.bottom
+      // console.log(data)
+      let filteredData = data.value.filter(
+        (item: any) =>
+          item['productionDates'] &&
+          item['productionDates'][0]['fromYear'] !== undefined &&
+          item['id'] !== undefined
+      )
+      console.log(filteredData)
 
-    // Create SVG container
-    const svg = d3
-      .select(this.$refs.svg)
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
-      .append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`)
+      this.parsedData = filteredData.map((d: any) => ({
+        date: d['productionDates'][0]['fromYear'],
+        value: d['id']
+      }))
+      // console.log(this.parsedData)
 
-    // Set scales
-    const x = d3
-      .scaleLinear()
-      .domain([d3.min(parsedData, (d: any) => d.value), d3.max(parsedData, (d: any) => d.value)])
-      .range([0, width])
+      // Set dimensions and margins
+      const margin = { top: 20, right: 30, bottom: 40, left: 40 }
+      const width = 600 - margin.left - margin.right
+      const height = 400 - margin.top - margin.bottom
 
-    const y = d3
-      .scaleLinear()
-      .domain([d3.min(parsedData, (d: any) => d.date), d3.max(parsedData, (d: any) => d.date)])
-      .nice()
-      .range([height, 0])
+      // clear svg
+      d3.select('svg').selectAll('*').remove()
 
-    // Create line generator
-    const line = d3
-      .line()
-      .x((d: any) => x(d.value))
-      .y((d: any) => y(d.date))
-    // Add the line path
-    svg
-      .append('path')
-      .datum(parsedData)
-      .attr('fill', 'none')
-      .attr('stroke', 'steelblue')
-      .attr('stroke-width', 1.5)
-      .attr('d', line)
+      // Create SVG container
+      const svg = d3
+        .select(this.$refs.svg)
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`)
 
-    // Add X axis
-    svg.append('g').attr('transform', `translate(0,${height})`).call(d3.axisBottom(x).ticks(5))
+      // Set scales
+      const x = d3
+        .scaleLinear()
+        .domain([
+          d3.min(this.parsedData, (d: any) => d.value),
+          d3.max(this.parsedData, (d: any) => d.value)
+        ])
+        .range([0, width])
 
-    // Add Y axis
-    svg.append('g').call(d3.axisLeft(y))
+      const y = d3
+        .scaleLinear()
+        .domain([
+          d3.min(this.parsedData, (d: any) => d.date),
+          d3.max(this.parsedData, (d: any) => d.date)
+        ])
+        .nice()
+        .range([height, 0])
 
-    // Draw dots
-    svg
-      .selectAll('.dot')
-      .data(parsedData)
-      .enter()
-      .append('circle')
-      .attr('class', 'dot')
-      .attr('cx', (d: any) => x(d.value))
-      .attr('cy', (d: any) => y(d.date))
-      .attr('r', 5) // Radius of the dots
-      .attr('fill', 'white')
-    svg.append('g').attr('transform', `translate(0,${height})`).call(d3.axisBottom(x))
-    svg.append('g').call(d3.axisLeft(y))
+      // Create line generator
+      const line = d3
+        .line()
+        .x((d: any) => x(d.value))
+        .y((d: any) => y(d.date))
+      // Add the line path
+      svg
+        .append('path')
+        .datum(this.parsedData)
+        .attr('fill', 'none')
+        .attr('stroke', 'steelblue')
+        .attr('stroke-width', 1.5)
+        .attr('d', line)
+
+      // Add X axis
+      svg.append('g').attr('transform', `translate(0,${height})`).call(d3.axisBottom(x).ticks(5))
+
+      // Add Y axis
+      svg.append('g').call(d3.axisLeft(y))
+
+      // Draw dots
+      svg
+        .selectAll('.dot')
+        .data(this.parsedData)
+        .enter()
+        .append('circle')
+        .attr('class', 'dot')
+        .attr('cx', (d: any) => x(d.value))
+        .attr('cy', (d: any) => y(d.date))
+        .attr('r', 4) // Radius of the dots
+        .attr('fill', 'white')
+      svg.append('g').attr('transform', `translate(0,${height})`).call(d3.axisBottom(x))
+      svg.append('g').call(d3.axisLeft(y))
+    }
   }
 }
 </script>
