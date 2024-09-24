@@ -1,19 +1,41 @@
 <script lang="ts">
+// Use a Pinia store to hold the API results through the whole app
+// Access the data by importing the store
+import { useSearchDataStore } from '@/stores/searchData'
+var store: any
+function updateStore(newData: any) {
+  // Define a variable to represent the store
+  store = useSearchDataStore()
+  // Then use store.theStoredData to get/set the collection
+  store.theStoredData = newData
+  return {
+    theStoredData: store.theStoredData
+  }
+}
+// var theCollection = store.theStoredData
 export default {
   name: 'HelloWorld',
   props: {
     msg: String
   },
+  mounted() {
+    // If there's already results, show them
+    if (store) {
+      this.resultSet = store.theStoredData
+    } else {
+      this.resultSet = []
+    }
+  },
   data() {
     return {
       theData: {},
       tempData: {},
-      resultSet: [],
-      tempResultSet: [],
+      resultSet: Array(),
+      tempResultSet: Array(),
       currentPage: 1,
       total: 0,
       imgURL: 'https://media.nfsacollection.net/',
-      query: 'https://api.collection.nfsa.gov.au/search?limit=25&query=',
+      query: 'https://api.collection.nfsa.gov.au/search?limit=25&hasMedia=yes&query=',
       searchString: 'lobby'
     }
   },
@@ -23,6 +45,7 @@ export default {
       // in this case we use a text box which sets searchString
       // and the currentPage to allow us to loop through the paginated results
       let queryString = this.query + this.searchString + '&page=' + this.currentPage
+      // let queryString = 'https://api.collection.nfsa.gov.au/search?limit=25&query=dog&hasMedia=yes'
       console.log('API call: ' + queryString)
       fetch(queryString)
         .then((response) => {
@@ -50,6 +73,7 @@ export default {
                 this.currentPage = 1
                 console.log('Pages: ' + Math.ceil(this.$data.total / 25))
                 console.log('finished')
+                updateStore(this.$data.resultSet)
               }
             } else {
               console.log('no results')
@@ -59,6 +83,9 @@ export default {
         .catch((err) => {
           console.error(err)
         })
+    },
+    clearResults() {
+      this.$data.resultSet = []
     }
   }
 }
@@ -70,6 +97,7 @@ export default {
 
     <input v-model="searchString" placeholder="query" />
     <button @click="fetchData">fetch data</button>
+    <button @click="clearResults">clear results</button>
 
     <p>Total: {{ total }}</p>
 
@@ -78,31 +106,58 @@ export default {
       loop through the API results and add a list item for each result.
       Use result to access properties like 'title' and 'name' -->
       <li v-for="(result, index) in resultSet" :key="result[index]">
-        <p>{{ result['title'] }}</p>
+        <p class="title">{{ result['title'] }}</p>
         <p>{{ result['name'] }}</p>
         <!-- check if there's any items in the preview array.  If so, put the biggest image in the view -->
         <!-- v-bind is used to update the src attribute when the data comes in -->
-        <img
-          v-if="result['preview'] && result['preview'][0]"
-          v-bind:src="imgURL + result['preview'][0]['filePath']"
-          v-bind:alt="result['name']"
-          v-bind:title="result['name']"
-        />
+        <Transition>
+          <img
+            v-if="result['preview'] && result['preview'][0]"
+            v-bind:src="imgURL + result['preview'][0]['filePath']"
+            v-bind:alt="result['name']"
+            v-bind:title="result['name']"
+          />
+        </Transition>
       </li>
     </ul>
   </div>
 </template>
 
 <style scoped>
+.v-enter-from {
+  opacity: 0;
+  translate: -100px 0;
+}
+.v-enter-to {
+  opacity: 1;
+  translate: 0 0;
+}
+.v-leave-from {
+  opacity: 1;
+  translate: 0 0;
+}
+.v-leave-to {
+  opacity: 0;
+  translate: 100px 0;
+}
 img {
   display: inline-block;
-  max-width: 200px;
+  max-width: 100%;
+  transition: all 2s;
 }
 
 ul {
+  padding: 0;
   list-style: none;
   display: flex;
   flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+li {
+  max-width: 300px;
+  padding: 0.5rem;
+  border: 1px solid #ffffff33;
 }
 
 h1 {
@@ -114,6 +169,14 @@ h1 {
 
 h3 {
   font-size: 1.2rem;
+}
+
+.title {
+  color: #eeeeee;
+  font-weight: bold;
+  font-size: 150%;
+  line-height: 125%;
+  margin-bottom: 0.5rem;
 }
 
 .search h1,
